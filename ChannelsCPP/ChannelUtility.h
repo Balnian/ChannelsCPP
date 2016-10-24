@@ -16,6 +16,7 @@ namespace chan
 
 	};*/
 	template<typename T> class Channel;
+	template<typename T> class OutChannel;
 	/*class NoOpSelect {};
 	class OpSelect{};
 	template<typename TT=OpSelect>
@@ -63,6 +64,15 @@ namespace chan
 					f(*val);
 				};
 				return val == nullptr;
+			};
+		}
+
+		template<typename T, typename func>
+		Case(OutChannel<T> ch, func f)
+		{
+			task = [=]() {
+				f();
+				return true;
 			};
 		}
 

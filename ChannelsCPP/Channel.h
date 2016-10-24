@@ -11,6 +11,7 @@
 
 namespace chan
 {
+
 	template<typename T>
 	class Channel
 	{
@@ -90,15 +91,15 @@ namespace chan
 		}
 
 		//Insert in channel
-		friend 	Channel<T>& operator<<(Channel<T>& ch, const T& obj)
+		friend 	OutChannel<T>& operator<<(Channel<T>& ch, const T& obj)
 		{
 			ch.insertValue(obj);
-			return ch;
+			return OutChannel<T>(ch);
 		}
-		friend 	Channel<T>& operator >> (const T& obj, Channel<T>& ch)
+		friend 	OutChannel<T>& operator >> (const T& obj, Channel<T>& ch)
 		{
 			ch.insertValue(obj);
-			return ch;
+			return  OutChannel<T>(ch);
 
 		}
 
@@ -120,6 +121,26 @@ namespace chan
 		
 
 	};
+
+	template<typename T>
+	class OutChannel : private Channel<T>
+	{
+	public:
+		OutChannel(Channel<T> ch) :Channel<T>(ch) {}
+		//Insert in channel
+		friend 	OutChannel<T>& operator<<(OutChannel<T>& ch, const T& obj)
+		{
+			ch.insertValue(obj);
+			return *this;
+		}
+		friend 	OutChannel<T>& operator >> (const T& obj, OutChannel<T>& ch)
+		{
+			ch.insertValue(obj);
+			return  *this;
+
+		}
+	};
+
 	
 
 	//Specialized (Buffered)
