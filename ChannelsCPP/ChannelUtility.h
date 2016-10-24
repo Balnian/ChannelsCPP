@@ -6,50 +6,9 @@
 #include<iostream>
 namespace chan
 {
-	/*template<typename T>
-	class Optional :private std::pair<T, bool>
-	{
-	public:
-		template<typename ...Args>
-		Optional(Args &&... args) : std::pair<T, bool>(std::forward(args), false) {}
-		bool operator
-
-	};*/
 	template<typename T> class Channel;
 	template<typename T> class OutChannel;
-	/*class NoOpSelect {};
-	class OpSelect{};
-	template<typename TT=OpSelect>
-	class Select
-	{
-
-	public:
-		template<typename T, typename func>
-		static Select& Case(Channel<T> chan, func f)
-		{
-			auto val = chan.m_channel->tryGetNextValue();
-			if (val)
-			{
-				f(*val);
-				return Select<NoOpSelect>;
-			}
-			else
-				return this;
-		}
-		template<typename func>
-		static void Default(func f)
-		{
-			f();
-		}
-	};
-	template<>
-	class Select<NoOpSelect>
-	{
-		template<typename T, typename func>
-		static Select& Case(Channel<T> chan, func f) {}
-		template<typename func>
-		static void Default(func f) {}
-	};*/
+	
 	class Case
 	{
 		std::function<bool()> task;
@@ -80,9 +39,8 @@ namespace chan
 		{
 			return task();
 		}
-
-
 	};
+
 	class Default
 	{
 		std::function<void()> task;
@@ -98,6 +56,7 @@ namespace chan
 			task();
 		}
 	};
+
 	class Select
 	{
 		template<typename ...T>

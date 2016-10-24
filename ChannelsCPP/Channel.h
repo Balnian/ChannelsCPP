@@ -38,6 +38,7 @@ namespace chan
 				return temp;
 			}
 
+			//Should use std::optional but MSVC and Clang doesn't support it yet :( #C++17
 			std::unique_ptr<T> tryGetNextValue()
 			{
 				std::unique_lock<std::mutex> ulock(bufferLock);
