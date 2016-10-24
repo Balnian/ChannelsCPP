@@ -75,6 +75,11 @@ namespace chan
 		{
 			d();
 		}
+		template<typename ...T>
+		void exec(Default && c, T &&... params)
+		{
+			static_assert(false, "There should only be at most 1 Default case and it must be the last parameter of the Select");
+		}
 
 	public:
 		template<typename ...T>
