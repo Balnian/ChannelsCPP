@@ -8,16 +8,17 @@ namespace go
 {
 	template<typename T> class Chan;
 	template<typename T> class OChan;
+	template<typename T> class IChan;
 	
 	class Case
 	{
 		std::function<bool()> task;
 	public:
 		template<typename T, typename func>
-		Case(Chan<T> ch, func f)
+		Case(IChan<T> ch, func f)
 		{
 			task = [=]() {
-				auto val = ch.m_channel->tryGetNextValue();
+				auto val = ch.m_buffer->tryGetNextValue();
 				if (val)
 				{
 					f(*val);
@@ -34,6 +35,10 @@ namespace go
 				return true;
 			};
 		}
+
+		template<typename T, typename func>
+		Case(Chan<T> ch, func f): Case(IChan<T>(ch),std::forward<func>(f)){}
+
 
 		bool operator() ()
 		{

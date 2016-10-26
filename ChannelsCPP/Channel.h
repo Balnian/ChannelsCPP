@@ -11,106 +11,106 @@
 
 namespace go
 {
-
 	template<typename T>
-	class Chan
+	class ChannelBuffer
 	{
 	private:
-		class ChannelBuffer
-		{
-		private:
-			std::queue<T> buffer;
-			std::mutex bufferLock;
-			std::condition_variable inputWait;
-		public:
-			ChannelBuffer() = default;
-			~ChannelBuffer() = default;
-			T getNextValue()
-			{
-				std::unique_lock<std::mutex> ulock(bufferLock);
-				if (buffer.empty())
-				{
-					inputWait.wait(ulock, [&]() {return !buffer.empty(); });
-				}
-				T temp;
-				std::swap(temp, buffer.front());
-				buffer.pop();
-				return temp;
-			}
-
-			//Should use std::optional but MSVC and Clang doesn't support it yet :( #C++17
-			std::unique_ptr<T> tryGetNextValue()
-			{
-				std::unique_lock<std::mutex> ulock(bufferLock);
-				if (buffer.empty())
-				{
-					return nullptr;
-				}
-				std::unique_ptr<T> temp = std::make_unique<T>(buffer.front());
-				buffer.pop();
-				return std::move(temp);
-			}
-			void insertValue(T in)
-			{
-				{
-					std::lock_guard<std::mutex> lock(bufferLock);
-					buffer.push(in);
-				}
-				inputWait.notify_one();
-			}
-
-		};
-		std::shared_ptr<ChannelBuffer> m_channel ;
+		std::queue<T> buffer;
+		std::mutex bufferLock;
+		std::condition_variable inputWait;
+	public:
+		ChannelBuffer() = default;
+		~ChannelBuffer() = default;
 		T getNextValue()
 		{
-			return m_channel->getNextValue();
+			std::unique_lock<std::mutex> ulock(bufferLock);
+			if (buffer.empty())
+			{
+				inputWait.wait(ulock, [&]() {return !buffer.empty(); });
+			}
+			T temp;
+			std::swap(temp, buffer.front());
+			buffer.pop();
+			return temp;
 		}
 
-		void insertValue(T val)
+		//Should use std::optional but MSVC and Clang doesn't support it yet :( #C++17
+		std::unique_ptr<T> tryGetNextValue()
 		{
-			m_channel->insertValue(val);
+			std::unique_lock<std::mutex> ulock(bufferLock);
+			if (buffer.empty())
+			{
+				return nullptr;
+			}
+			std::unique_ptr<T> temp = std::make_unique<T>(buffer.front());
+			buffer.pop();
+			return std::move(temp);
+		}
+		void insertValue(T in)
+		{
+			{
+				std::lock_guard<std::mutex> lock(bufferLock);
+				buffer.push(in);
+			}
+			inputWait.notify_one();
 		}
 
+	};
+
+	template<typename T>
+	class OChan //: private Chan<T>
+	{
+	protected:
+		std::shared_ptr<ChannelBuffer<T>> m_buffer;
+		OChan(std::shared_ptr<ChannelBuffer<T>> buffer) : m_buffer(buffer) {}
 	public:
-		Chan()
-		{
-			m_channel = std::make_shared<ChannelBuffer>();
-		}
-		~Chan()=default;
-
-		//Extract from channel
-		friend 	T& operator >> (Chan<T>& ch, T& obj)
-		{
-			obj = ch.getNextValue();
-			return obj;
-
-		}
-		friend 	T& operator<<(T& obj, Chan<T>& ch)
-		{
-			obj = ch.getNextValue();
-			return obj;
-		}
-
+		OChan() = default;
+		OChan(const OChan<T>& ch) = default;// :m_buffer(ch.m_buffer) {}
 		//Insert in channel
-		friend 	OChan<T> operator<<(Chan<T>& ch, const T& obj)
+		friend 	OChan<T>& operator<<(OChan<T>& ch, const T& obj)
 		{
-			ch.insertValue(obj);
-			return OChan<T>(ch);
+			ch.m_buffer->insertValue(obj);
+			return ch;
 		}
-		friend 	OChan<T> operator >> (const T& obj, Chan<T>& ch)
+		friend 	OChan<T>& operator >> (const T& obj, OChan<T>& ch)
 		{
-			ch.insertValue(obj);
-			return  OChan<T>(ch);
+			ch.m_buffer->insertValue(obj);
+			return  ch;
 
 		}
 
 		//Stream
-		friend std::ostream& operator<<(std::ostream& os, Chan<T>& ch)
+		friend std::ostream& operator<<(std::ostream& os, OChan<T>& ch)
 		{
-			os << ch.getNextValue();
+			os << ch.m_buffer->getNextValue();
 			return os;
 		}
-		friend std::istream& operator >> (std::istream& is, Chan<T>& ch)
+	};
+
+	template<typename T>
+	class IChan //: private Chan<T>
+	{
+	protected:
+		std::shared_ptr<ChannelBuffer<T>> m_buffer;
+		IChan(std::shared_ptr<ChannelBuffer<T>> buffer) : m_buffer(buffer) {}
+	public:
+		IChan() = default;
+		IChan(const IChan<T>& ch) = default;//:m_buffer(ch.m_buffer) {}
+		//Extract from channel
+		friend 	IChan<T>& operator >> (IChan<T>& ch, T& obj)
+		{
+			obj = ch.getNextValue();
+			return ch;
+
+		}
+		friend 	IChan<T>& operator<<(T& obj, IChan<T>& ch)
+		{
+			obj = ch.getNextValue();
+			return ch;
+		}
+
+		//Stream
+		friend std::istream& operator >> (std::istream& is, IChan<T>& ch)
 		{
 			T temp;
 			is >> temp;
@@ -119,29 +119,35 @@ namespace go
 		}
 
 		friend class Case;
-		
 
 	};
 
 	template<typename T>
-	class OChan : private Chan<T>
+	class Chan:public  IChan<T>, public OChan<T>
 	{
 	public:
-		OChan(Chan<T> ch) :Chan<T>(ch) {}
-		//Insert in channel
-		friend 	OChan<T>& operator<<(OChan<T>& ch, const T& obj)
+		Chan()
 		{
-			ch.insertValue(obj);
-			return *this;
+			IChan<T>::m_buffer = OChan<T>::m_buffer = std::make_shared<ChannelBuffer<T>>();
 		}
-		friend 	OChan<T>& operator >> (const T& obj, OChan<T>& ch)
-		{
-			ch.insertValue(obj);
-			return  *this;
+		~Chan()=default;
 
+		
+		//Stream
+		friend std::ostream& operator<<(std::ostream& os, Chan<T>& ch)
+		{
+			return os << static_cast<OChan<T>>(ch);
 		}
+		friend std::istream& operator >> (std::istream& is, Chan<T>& ch)
+		{
+			return is >> static_cast<IChan<T>>(ch);
+		}
+
+		
+
 	};
 
+	
 	
 
 	//Specialized (Buffered)
