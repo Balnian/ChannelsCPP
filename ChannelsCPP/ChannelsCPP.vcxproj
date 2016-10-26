@@ -143,12 +143,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Channel.cpp" />
+    <ClCompile Include="ChannelBuffer.cpp" />
     <ClCompile Include="ChannelUtility.cpp" />
+    <ClCompile Include="IChannel.cpp" />
+    <ClCompile Include="OChannel.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Channel.h" />
+    <ClInclude Include="ChannelBuffer.h" />
     <ClInclude Include="ChannelUtility.h" />
+    <ClInclude Include="IChannel.h" />
+    <ClInclude Include="OChannel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

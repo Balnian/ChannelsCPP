@@ -3,6 +3,7 @@
 #include <thread>
 #include <chrono>
 #include <string>
+#include <vector>
 
 using namespace std;
 using namespace go;
@@ -86,6 +87,51 @@ int main()
 	t2.join();
 
 
-	
+	cout << "------Demo range for on channel-----" << endl;
 
+	Chan<int> ch3;
+
+	thread t3 = thread([&]() 
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			ch3 << i;
+			this_thread::sleep_for(chrono::seconds(1));
+		}
+		Close(ch3);
+	});
+
+	for (auto &asd : ch3)
+	{
+		cout << asd << endl;
+	}
+	cout << "Fini" << endl;
+	t3.join();
+	
+	//must be fix
+	cout << "------Test closing Channel-----" << endl;
+	Chan<int> tested;
+	Chan<int> output;
+	vector<thread> vt;
+	for (size_t i = 0; i < 10; i++)
+	{
+		vt.emplace_back([&]() 
+		{
+			output << tested;
+		});
+	}
+	this_thread::sleep_for(chrono::seconds(1));
+	tested << 3 << 2 << 1; //doesn't work... find why (atomic not initialized)
+	//Close(tested);
+	int i = 0;
+	for (auto &asd : output)
+	{
+		++i;
+		cout << output << endl;
+	}
+	cout << "i: " << i << endl;
+	for (auto &t : vt)
+	{
+		t.join();
+	}
 }
