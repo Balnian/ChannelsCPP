@@ -5,10 +5,10 @@
 #include <string>
 
 using namespace std;
-using namespace chan;
+using namespace go;
 
 
-void fibonacci(Channel<int>& c, Channel<int>& quit)
+void fibonacci(Chan<int>& c, Chan<int>& quit)
 {
 	int x=0, y = 1;
 	for (bool go = true; go;)
@@ -30,7 +30,7 @@ void fibonacci(Channel<int>& c, Channel<int>& quit)
 	}
 }
 template<typename T>
-void f(Channel<T>& ch, T x, int time)
+void f(Chan<T>& ch, T x, int time)
 {
 	this_thread::sleep_for(chrono::seconds(time));
 	ch << x;
@@ -39,8 +39,8 @@ int main()
 {
 	cout << "------Demo fibonacci (https://tour.golang.org/concurrency/5)-----" << endl;
 
-	Channel<int> c;
-	Channel<int> quit;
+	Chan<int> c;
+	Chan<int> quit;
 
 	thread([&]()
 	{
@@ -54,8 +54,8 @@ int main()
 
 	cout << "------Demo with Default-----" << endl;
 
-	Channel<int> ch;
-	Channel<string> ch2;
+	Chan<int> ch;
+	Chan<string> ch2;
 
 	auto t1 = thread(f<int>, ref(ch), 1, 3);
 	auto t2 = thread(f<string>, ref(ch2), "J'aime",1 );

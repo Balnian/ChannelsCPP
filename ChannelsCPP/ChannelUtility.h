@@ -4,17 +4,17 @@
 #include <functional>
 
 #include<iostream>
-namespace chan
+namespace go
 {
-	template<typename T> class Channel;
-	template<typename T> class OutChannel;
+	template<typename T> class Chan;
+	template<typename T> class OChan;
 	
 	class Case
 	{
 		std::function<bool()> task;
 	public:
 		template<typename T, typename func>
-		Case(Channel<T> ch, func f)
+		Case(Chan<T> ch, func f)
 		{
 			task = [=]() {
 				auto val = ch.m_channel->tryGetNextValue();
@@ -27,7 +27,7 @@ namespace chan
 		}
 
 		template<typename T, typename func>
-		Case(OutChannel<T> ch, func f)
+		Case(OChan<T> ch, func f)
 		{
 			task = [=]() {
 				f();

@@ -1,5 +1,5 @@
 #include "Channel.h"
-using namespace chan;
+using namespace go;
 
 
 /*template<typename T, unsigned int buffSize>
@@ -20,7 +20,7 @@ chan::Channel<T, buffSize>::~Channel()
 */
 
 template<typename T>
-T& operator<<(Channel<T>& ch, const T& obj)
+T& operator<<(Chan<T>& ch, const T& obj)
 {
 	ch.insertValue(obj);
 	return ch;
@@ -28,7 +28,7 @@ T& operator<<(Channel<T>& ch, const T& obj)
 
 
 template<typename T>
-Channel<T>& operator >> (Channel<T>& ch, T& obj)
+Chan<T>& operator >> (Chan<T>& ch, T& obj)
 {
 	obj = ch.getNextValue();
 	return obj;

@@ -9,11 +9,11 @@
 
 #include "ChannelUtility.h"
 
-namespace chan
+namespace go
 {
 
 	template<typename T>
-	class Channel
+	class Chan
 	{
 	private:
 		class ChannelBuffer
@@ -72,45 +72,45 @@ namespace chan
 		}
 
 	public:
-		Channel()
+		Chan()
 		{
 			m_channel = std::make_shared<ChannelBuffer>();
 		}
-		~Channel()=default;
+		~Chan()=default;
 
 		//Extract from channel
-		friend 	T& operator >> (Channel<T>& ch, T& obj)
+		friend 	T& operator >> (Chan<T>& ch, T& obj)
 		{
 			obj = ch.getNextValue();
 			return obj;
 
 		}
-		friend 	T& operator<<(T& obj, Channel<T>& ch)
+		friend 	T& operator<<(T& obj, Chan<T>& ch)
 		{
 			obj = ch.getNextValue();
 			return obj;
 		}
 
 		//Insert in channel
-		friend 	OutChannel<T>& operator<<(Channel<T>& ch, const T& obj)
+		friend 	OChan<T> operator<<(Chan<T>& ch, const T& obj)
 		{
 			ch.insertValue(obj);
-			return OutChannel<T>(ch);
+			return OChan<T>(ch);
 		}
-		friend 	OutChannel<T>& operator >> (const T& obj, Channel<T>& ch)
+		friend 	OChan<T> operator >> (const T& obj, Chan<T>& ch)
 		{
 			ch.insertValue(obj);
-			return  OutChannel<T>(ch);
+			return  OChan<T>(ch);
 
 		}
 
 		//Stream
-		friend std::ostream& operator<<(std::ostream& os, Channel<T>& ch)
+		friend std::ostream& operator<<(std::ostream& os, Chan<T>& ch)
 		{
 			os << ch.getNextValue();
 			return os;
 		}
-		friend std::istream& operator >> (std::istream& is, Channel<T>& ch)
+		friend std::istream& operator >> (std::istream& is, Chan<T>& ch)
 		{
 			T temp;
 			is >> temp;
@@ -124,17 +124,17 @@ namespace chan
 	};
 
 	template<typename T>
-	class OutChannel : private Channel<T>
+	class OChan : private Chan<T>
 	{
 	public:
-		OutChannel(Channel<T> ch) :Channel<T>(ch) {}
+		OChan(Chan<T> ch) :Chan<T>(ch) {}
 		//Insert in channel
-		friend 	OutChannel<T>& operator<<(OutChannel<T>& ch, const T& obj)
+		friend 	OChan<T>& operator<<(OChan<T>& ch, const T& obj)
 		{
 			ch.insertValue(obj);
 			return *this;
 		}
-		friend 	OutChannel<T>& operator >> (const T& obj, OutChannel<T>& ch)
+		friend 	OChan<T>& operator >> (const T& obj, OChan<T>& ch)
 		{
 			ch.insertValue(obj);
 			return  *this;
