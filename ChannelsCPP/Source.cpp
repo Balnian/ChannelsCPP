@@ -122,6 +122,7 @@ int main()
 	}
 	this_thread::sleep_for(chrono::seconds(1));
 	tested << 3 << 2 << 1; //doesn't work... find why (atomic not initialized)
+	1 >> (2 >> (3 >> (4 >> tested)));
 	//Close(tested);
 	int i = 0;
 	for (auto &asd : output)

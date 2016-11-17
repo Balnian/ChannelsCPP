@@ -25,13 +25,13 @@ namespace go
 		~Chan() = default;
 
 		//Insert in channel
-		friend 	channel::OChan<T>& operator<<(Chan<T>& ch, const T& obj)
+		friend 	channel::OChan<T> operator<<(Chan<T>& ch, const T& obj)
 		{
 			return static_cast<channel::OChan<T>>(ch) << obj;
 			/*ch.m_buffer->insertValue(obj);
 			return ch;*/
 		}
-		friend 	channel::OChan<T>& operator >> (const T& obj, Chan<T>& ch)
+		friend 	channel::OChan<T> operator >> (const T& obj, Chan<T>& ch)
 		{
 			return static_cast<channel::OChan<T>>(ch) << obj;
 
