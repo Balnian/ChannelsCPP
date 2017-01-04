@@ -5,9 +5,11 @@
 #include <string>
 #include <vector>
 
+#include "Circular_buffer.h"
+
 using namespace std;
 using namespace go;
-
+using namespace go::internal;
 
 void fibonacci(Chan<int>& c, Chan<int>& quit)
 {
@@ -38,7 +40,64 @@ void f(Chan<T>& ch, T x, int time)
 }
 int main()
 {
-	cout << "------Demo fibonacci (https://tour.golang.org/concurrency/5)-----" << endl;
+	Circular_buffer<int,2> buff;
+	// Try on empty
+	try
+	{
+		cout << buff.pop_front() << endl;
+	}
+	catch (const std::exception& e)
+	{
+		cout << e.what() << endl;
+	}
+	//testz
+	try
+	{
+		buff.emplace_back(5);
+	}
+	catch (const std::exception& e)
+	{
+		cout << e.what() << endl;
+	}
+	// Test Pop
+	try
+	{
+		cout << buff.pop_front() << endl;
+	}
+	catch (const std::exception& e)
+	{
+		cout << e.what() << endl;
+	}
+	//insert
+	try
+	{
+		buff.emplace_back(5);
+	}
+	catch (const std::exception& e)
+	{
+		cout << e.what() << endl;
+	}
+	//full
+	try
+	{
+		buff.emplace_back(5);
+	}
+	catch (const std::exception& e)
+	{
+		cout << e.what() << endl;
+	}
+	//exception full
+	try
+	{
+		buff.emplace_back(5);
+	}
+	catch (const std::exception& e)
+	{
+		cout << e.what() << endl;
+	}
+
+
+	/*cout << "------Demo fibonacci (https://tour.golang.org/concurrency/5)-----" << endl;
 
 	Chan<int> c;
 	Chan<int> quit;
@@ -134,5 +193,5 @@ int main()
 	for (auto &t : vt)
 	{
 		t.join();
-	}
+	}*/
 }

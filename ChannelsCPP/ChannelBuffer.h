@@ -33,7 +33,6 @@ namespace go
 					inputWait.wait(ulock, [&]() {return !buffer.empty() || is_closed; });
 					if (buffer.empty() && is_closed) // when we close the channel and there was more waiting then available value 
 						return{};
-
 				}
 
 				T temp;

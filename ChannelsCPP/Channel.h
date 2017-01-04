@@ -14,7 +14,7 @@
 namespace go
 {
 	//Channel Type references: https://golang.org/ref/spec#Channel_types
-	template<typename T>
+	template<typename T/*, size_t Buffer_Size=1*/>
 	class Chan :public IChan<T>, public OChan<T>
 	{
 	public:
