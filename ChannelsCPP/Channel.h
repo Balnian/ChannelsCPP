@@ -15,25 +15,25 @@ namespace go
 {
 	//Channel Type references: https://golang.org/ref/spec#Channel_types
 	template<typename T>
-	class Chan :public channel::IChan<T>, public channel::OChan<T>
+	class Chan :public IChan<T>, public OChan<T>
 	{
 	public:
 		Chan()
 		{
-			channel::IChan<T>::m_buffer = channel::OChan<T>::m_buffer = std::make_shared<channel::ChannelBuffer<T>>();
+			IChan<T>::m_buffer = OChan<T>::m_buffer = std::make_shared<internal::ChannelBuffer<T>>();
 		}
 		~Chan() = default;
 
 		//Insert in channel
-		friend 	channel::OChan<T> operator<<(Chan<T>& ch, const T& obj)
+		friend 	OChan<T> operator<<(Chan<T>& ch, const T& obj)
 		{
-			return static_cast<channel::OChan<T>>(ch) << obj;
+			return static_cast<OChan<T>>(ch) << obj;
 			/*ch.m_buffer->insertValue(obj);
 			return ch;*/
 		}
-		friend 	channel::OChan<T> operator >> (const T& obj, Chan<T>& ch)
+		friend 	OChan<T> operator >> (const T& obj, Chan<T>& ch)
 		{
-			return static_cast<channel::OChan<T>>(ch) << obj;
+			return static_cast<OChan<T>>(ch) << obj;
 
 			/*ch.m_buffer->insertValue(obj);
 			return  ch;*/
@@ -42,18 +42,18 @@ namespace go
 		//Stream
 		friend std::ostream& operator<<(std::ostream& os, Chan<T>& ch)
 		{
-			return os << static_cast<channel::OChan<T>>(ch);
+			return os << static_cast<OChan<T>>(ch);
 		}
 		friend std::istream& operator >> (std::istream& is, Chan<T>& ch)
 		{
-			return is >> static_cast<channel::IChan<T>>(ch);
+			return is >> static_cast<IChan<T>>(ch);
 		}
 
 
 
 	};
 
-
+}
 
 
 	//Specialized (Buffered)
@@ -155,4 +155,3 @@ namespace go
 
 	};*/
 
-}

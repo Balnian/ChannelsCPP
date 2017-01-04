@@ -8,7 +8,7 @@
 #include <atomic>
 namespace go
 {
-	namespace channel
+	namespace internal
 	{
 		template<typename T>
 		class ChannelBuffer

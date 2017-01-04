@@ -6,8 +6,7 @@ namespace go
 {
 	class Case;
 
-	namespace channel
-	{
+	
 		template<typename T> class OChan;
 
 		// Inspired by http://h-deb.clg.qc.ca/Sujets/Divers--cplusplus/Iterateurs-generateurs.html From Patrice Roy
@@ -16,11 +15,11 @@ namespace go
 		template<typename T>
 		class IChan_Iterator :public std::iterator<std::input_iterator_tag, T> //:public std::shared_ptr<T>
 		{
-			std::shared_ptr<ChannelBuffer<T>> m_buffer;
+			std::shared_ptr<internal::ChannelBuffer<T>> m_buffer;
 			T val;
 
 		public:
-			IChan_Iterator(std::shared_ptr<ChannelBuffer<T>> buffer, bool isEnd = false) :m_buffer(buffer)
+			IChan_Iterator(std::shared_ptr<internal::ChannelBuffer<T>> buffer, bool isEnd = false) :m_buffer(buffer)
 			{
 				if (!isEnd)
 					operator++();
@@ -50,8 +49,8 @@ namespace go
 		class IChan //: private Chan<T>
 		{
 		protected:
-			std::shared_ptr<ChannelBuffer<T>> m_buffer;
-			IChan(std::shared_ptr<ChannelBuffer<T>> buffer) : m_buffer(buffer) {}
+			std::shared_ptr<internal::ChannelBuffer<T>> m_buffer;
+			IChan(std::shared_ptr<internal::ChannelBuffer<T>> buffer) : m_buffer(buffer) {}
 		public:
 			IChan() = default;
 			IChan(const IChan<T>& ch) = default;//:m_buffer(ch.m_buffer) {}
@@ -108,6 +107,6 @@ namespace go
 			friend class go::Case;
 
 		};
-	}
+	
 }
 
