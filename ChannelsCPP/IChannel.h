@@ -7,19 +7,19 @@ namespace go
 	class Case;
 
 	
-		template<typename T> class OChan;
+		template<typename T, std::size_t Buffer_Size> class OChan;
 
 		// Inspired by http://h-deb.clg.qc.ca/Sujets/Divers--cplusplus/Iterateurs-generateurs.html From Patrice Roy
 		// References: https://golang.org/ref/spec#For_statements
 		// To be improved...
-		template<typename T>
+		template<typename T, std::size_t Buffer_Size = 0>
 		class IChan_Iterator :public std::iterator<std::input_iterator_tag, T> //:public std::shared_ptr<T>
 		{
-			std::shared_ptr<internal::ChannelBuffer<T>> m_buffer;
+			std::shared_ptr<internal::ChannelBuffer<T, Buffer_Size>> m_buffer;
 			T val;
 
 		public:
-			IChan_Iterator(std::shared_ptr<internal::ChannelBuffer<T>> buffer, bool isEnd = false) :m_buffer(buffer)
+			IChan_Iterator(std::shared_ptr<internal::ChannelBuffer<T, Buffer_Size>> buffer, bool isEnd = false) :m_buffer(buffer)
 			{
 				if (!isEnd)
 					operator++();
@@ -45,30 +45,31 @@ namespace go
 			inline bool operator!=(const IChan_Iterator& rhs) const { return !operator==(rhs); }
 
 		};
-		template<typename T>
+		template<typename T, std::size_t Buffer_Size = 0>
 		class IChan //: private Chan<T>
 		{
 		protected:
-			std::shared_ptr<internal::ChannelBuffer<T>> m_buffer;
-			IChan(std::shared_ptr<internal::ChannelBuffer<T>> buffer) : m_buffer(buffer) {}
+			std::shared_ptr<internal::ChannelBuffer<T, Buffer_Size>> m_buffer;
+			IChan(std::shared_ptr<internal::ChannelBuffer<T, Buffer_Size>> buffer) : m_buffer(buffer) {}
 		public:
 			IChan() = default;
-			IChan(const IChan<T>& ch) = default;//:m_buffer(ch.m_buffer) {}
+			IChan(const IChan<T, Buffer_Size>& ch) = default;//:m_buffer(ch.m_buffer) {}
 
 			//Extract from channel
-			friend 	IChan<T>& operator >> (IChan<T>& ch, T& obj)
+			friend 	IChan<T, Buffer_Size>& operator >> (IChan<T, Buffer_Size>& ch, T& obj)
 			{
 				obj = ch.m_buffer->getNextValue();
 				return ch;
 
 			}
-			friend 	IChan<T>& operator<<(T& obj, IChan<T>& ch)
+			friend 	IChan<T, Buffer_Size>& operator<<(T& obj, IChan<T, Buffer_Size>& ch)
 			{
 				obj = ch.m_buffer->getNextValue();
 				return ch;
 			}
 
-			friend 	IChan<T>& operator >> (IChan<T>& ch, OChan<T>& obj)
+			template<std::size_t OBuffer_Size>
+			friend 	IChan<T, Buffer_Size>& operator >> (IChan<T, Buffer_Size>& ch, OChan<T, OBuffer_Size>& obj)
 			{
 				T temp;
 				ch >> temp;
@@ -76,7 +77,8 @@ namespace go
 				return ch;
 
 			}
-			friend 	IChan<T>& operator<<(OChan<T>& obj, IChan<T>& ch)
+			template<std::size_t OBuffer_Size>
+			friend 	IChan<T, Buffer_Size>& operator<<(OChan<T, OBuffer_Size>& obj, IChan<T, Buffer_Size>& ch)
 			{
 				T temp;
 				ch >> temp;
@@ -84,7 +86,7 @@ namespace go
 				return ch;
 			}
 			//Stream
-			friend std::istream& operator >> (std::istream& is, IChan<T>& ch)
+			friend std::istream& operator >> (std::istream& is, IChan<T, Buffer_Size>& ch)
 			{
 				T temp;
 				is >> temp;
@@ -93,11 +95,11 @@ namespace go
 			}
 
 
-			using  IChan_EndIterator = IChan_Iterator<T>;
+			using  IChan_EndIterator = IChan_Iterator<T, Buffer_Size>;
 
-			IChan_Iterator<T> begin()
+			IChan_Iterator<T, Buffer_Size> begin()
 			{
-				return IChan_Iterator<T>{ m_buffer };
+				return IChan_Iterator<T, Buffer_Size>{ m_buffer };
 			}
 			IChan_EndIterator end()
 			{

@@ -5,17 +5,59 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <limits>
 
 #include "ChannelBuffer.h"
 #include "IChannel.h"
 #include "OChannel.h"
 #include "ChannelUtility.h"
+#include "Circular_buffer.h"
 
 namespace go
 {
 	//Channel Type references: https://golang.org/ref/spec#Channel_types
-	template<typename T/*, size_t Buffer_Size=1*/>
-	class Chan :public IChan<T>, public OChan<T>
+	template<typename T, std::size_t Buffer_Size = 1>
+	class Chan :public IChan<T, Buffer_Size>, public OChan<T, Buffer_Size>
+	{
+	public:
+		Chan()
+		{
+			IChan::m_buffer = OChan::m_buffer = std::make_shared<internal::ChannelBuffer<T, Buffer_Size>>();
+			//IChan<T, Buffer_Size>::m_buffer = OChan<T, Buffer_Size>::m_buffer = std::make_shared<internal::ChannelBuffer<T, Buffer_Size>>();
+		}
+		~Chan() = default;
+
+		//Insert in channel
+		friend 	OChan<T, Buffer_Size> operator<<(Chan<T, Buffer_Size>& ch, const T& obj)
+		{
+			return static_cast<OChan<T, Buffer_Size>>(ch) << obj;
+			/*ch.m_buffer->insertValue(obj);
+			return ch;*/
+		}
+		friend 	OChan<T, Buffer_Size> operator >> (const T& obj, Chan<T, Buffer_Size>& ch)
+		{
+			return static_cast<OChan<T, Buffer_Size>>(ch) << obj;
+
+			/*ch.m_buffer->insertValue(obj);
+			return  ch;*/
+
+		}
+		//Stream
+		friend std::ostream& operator<<(std::ostream& os, Chan<T, Buffer_Size>& ch)
+		{
+			return os << static_cast<OChan<T, Buffer_Size>>(ch);
+		}
+		friend std::istream& operator >> (std::istream& is, Chan<T, Buffer_Size>& ch)
+		{
+			return is >> static_cast<IChan<T, Buffer_Size>>(ch);
+		}
+
+
+
+	};
+
+	/*template<typename T>
+	class Chan<T,0> :public IChan<T>, public OChan<T>
 	{
 	public:
 		Chan()
@@ -28,15 +70,10 @@ namespace go
 		friend 	OChan<T> operator<<(Chan<T>& ch, const T& obj)
 		{
 			return static_cast<OChan<T>>(ch) << obj;
-			/*ch.m_buffer->insertValue(obj);
-			return ch;*/
 		}
 		friend 	OChan<T> operator >> (const T& obj, Chan<T>& ch)
 		{
 			return static_cast<OChan<T>>(ch) << obj;
-
-			/*ch.m_buffer->insertValue(obj);
-			return  ch;*/
 
 		}
 		//Stream
@@ -51,10 +88,12 @@ namespace go
 
 
 
-	};
+	};*/
 
 }
 
+//template<typename T>
+//using inf_chan = Chan<T, std::numeric_limits<std::size_t>::infinity(), std::queue<T>>;
 
 	//Specialized (Buffered)
 	/*template<typename T, std::size_t bufferSize>

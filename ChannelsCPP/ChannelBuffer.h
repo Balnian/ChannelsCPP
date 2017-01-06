@@ -6,17 +6,20 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+
+#include "Circular_buffer.h"
 namespace go
 {
 	namespace internal
 	{
-		template<typename T>
+		template<typename T, std::size_t Buffer_Size=0>
 		class ChannelBuffer
 		{
 		private:
-			std::queue<T> buffer;
+			Circular_buffer<T, Buffer_Size> buffer;
 			std::mutex bufferLock;
 			std::condition_variable inputWait;
+			std::condition_variable outputWait;
 			std::atomic_bool is_closed;
 		public:
 			ChannelBuffer():is_closed(false) { }
@@ -38,6 +41,7 @@ namespace go
 				T temp;
 				std::swap(temp, buffer.front());
 				buffer.pop();
+				outputWait.notify_one();
 				return temp;
 			}
 
@@ -53,6 +57,7 @@ namespace go
 				}
 				std::unique_ptr<T> temp = std::make_unique<T>(buffer.front());
 				buffer.pop();
+				outputWait.notify_one();
 				return std::move(temp);
 			}
 
@@ -61,7 +66,15 @@ namespace go
 				if (!is_closed)
 				{
 					{
-						std::lock_guard<std::mutex> lock(bufferLock);
+						std::unique_lock<std::mutex> lock(bufferLock);
+						if (buffer.full())
+						{
+							outputWait.wait(lock, [&]() {return !buffer.full() || is_closed; });
+							if (is_closed) // if channel was closed end all awaiting inputs (cannot send to a closed channel)
+							{
+								return;
+							}
+						}
 						buffer.push(in);
 					}
 					inputWait.notify_one();
@@ -72,6 +85,7 @@ namespace go
 			{
 				is_closed = true;
 				inputWait.notify_one();
+				outputWait.notify_all();
 
 			}
 

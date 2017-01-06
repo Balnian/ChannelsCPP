@@ -11,7 +11,8 @@ using namespace std;
 using namespace go;
 using namespace go::internal;
 
-void fibonacci(Chan<int>& c, Chan<int>& quit)
+template<size_t BufferSize>
+void fibonacci(Chan<int, BufferSize>& c, Chan<int>& quit)
 {
 	int x=0, y = 1;
 	for (bool go = true; go;)
@@ -32,15 +33,15 @@ void fibonacci(Chan<int>& c, Chan<int>& quit)
 		};
 	}
 }
-template<typename T>
-void f(Chan<T>& ch, T x, int time)
+template<typename T1, typename T2>
+void f(T1& ch, T2 x, int time)
 {
 	this_thread::sleep_for(chrono::seconds(time));
 	ch << x;
 }
 int main()
 {
-	Circular_buffer<int,2> buff;
+	/*Circular_buffer<int,2> buff;
 	// Try on empty
 	try
 	{
@@ -94,13 +95,32 @@ int main()
 	catch (const std::exception& e)
 	{
 		cout << e.what() << endl;
+	}*/
+
+
+	{
+		Chan<int> c;
+		thread([&]()
+		{
+			for (size_t i = 0; i < 10; i++)
+			{
+				cout << c << endl;
+			}
+		}).detach();
+
+		for (size_t i = 0; i < 10; i++)
+		{
+			c << i;
+		}
 	}
 
-
-	/*cout << "------Demo fibonacci (https://tour.golang.org/concurrency/5)-----" << endl;
+	cout << "------Demo fibonacci (https://tour.golang.org/concurrency/5)-----" << endl;
 
 	Chan<int> c;
 	Chan<int> quit;
+
+	c << 78;
+	cout << c << endl;
 
 	thread([&]()
 	{
@@ -117,8 +137,8 @@ int main()
 	Chan<int> ch;
 	Chan<string> ch2;
 
-	auto t1 = thread(f<int>, ref(ch), 1, 3);
-	auto t2 = thread(f<string>, ref(ch2), "J'aime",1 );
+	auto t1 = thread(f<decltype(ch),int>, ref(ch), 1, 3);
+	auto t2 = thread(f<decltype(ch2),string>, ref(ch2), "J'aime",1 );
 
 	for (bool asd = true; asd;)
 	{
@@ -193,5 +213,5 @@ int main()
 	for (auto &t : vt)
 	{
 		t.join();
-	}*/
+	}
 }

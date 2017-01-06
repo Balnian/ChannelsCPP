@@ -20,12 +20,16 @@ namespace go
 			pointer m_end;
 			size_t m_size;
 
-			void increment(pointer p)
+			void increment(pointer p)const
 			{
 				if (p + 1 == &m_buffer[0] + Buffer_Size)
+				{
 					p = &m_buffer[0];
-				++p;
-
+				}
+				else
+				{
+					++p;
+				}
 			}
 		public:
 			Circular_buffer()
@@ -52,6 +56,13 @@ namespace go
 			bool full() const
 			{
 				return m_size == Buffer_Size;
+			}
+
+			T& front()
+			{
+				if (empty())
+					throw std::out_of_range("container is empty");
+				return *m_front;
 			}
 
 			const T& front() const
@@ -88,6 +99,14 @@ namespace go
 				push_back(T(std::forward<Args>(args)...));
 			}
 
+			void pop()
+			{
+				if (empty())
+					throw std::out_of_range("container is empty");
+				--m_size;
+				increment(m_front);
+			}
+
 			T pop_front()
 			{
 				if (empty())
@@ -96,6 +115,11 @@ namespace go
 				T temp = *m_front;
 				increment(m_front);
 				return temp;
+			}
+
+			void push(T item)
+			{
+				push_back(item);
 			}
 
 
