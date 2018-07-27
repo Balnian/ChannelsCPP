@@ -3,6 +3,8 @@
 #include <utility>
 #include <functional>
 #include<iostream>
+#include <random>
+#include <algorithm>
 
 /*#include "IChannel.h"
 #include "OChannel.h"*/
@@ -45,6 +47,8 @@ namespace go
 		template<typename T, std::size_t Buffer_Size, typename func>
 		Case(Chan<T, Buffer_Size> ch, func f) : Case(IChan<T, Buffer_Size>(ch), std::forward<func>(f)) {}
 
+		Case(const Case&) = default;
+		Case() { task = []() {return true; }; }
 
 		bool operator() ()
 		{
@@ -70,21 +74,38 @@ namespace go
 
 	class Select
 	{
+		std::vector<Case> cases;
+
+		bool randomExec()
+		{
+			std::random_device rd;
+			std::mt19937 g(rd());
+			std::shuffle(begin(cases), end(cases), g);
+			for (auto& c : cases)
+			{
+				if (!c())
+					return true;
+			}
+			return false;
+		}
+
 		template<typename ...T>
 		void exec(Case && c, T &&... params)
 		{
-			if (c())
-				exec(std::forward<T>(params)...);
+			cases.emplace_back(c);
+			exec(std::forward<T>(params)...);
 		}
 
 		void exec(Case && c)
 		{
-			c();
+			cases.emplace_back(c);
+			randomExec();
 		}
 
 		void exec(Default && d)
 		{
-			d();
+			if(!randomExec())
+				d();
 		}
 		template<typename ...T>
 		void exec(Default && c, T &&... params)
@@ -94,7 +115,7 @@ namespace go
 
 	public:
 		template<typename ...T>
-		Select(T &&... params)
+		Select(T &&... params):cases(sizeof...(params))
 		{
 			exec(std::forward<T>(params)...);
 		}
