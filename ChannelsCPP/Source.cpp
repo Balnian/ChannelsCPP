@@ -173,7 +173,7 @@ int main()
 		for (int i = 0; i < 10; i++)
 		{
 			ch3 << i;
-			this_thread::sleep_for(chrono::seconds(1));
+			this_thread::sleep_for(chrono::milliseconds(500));
 		}
 		Close(ch3);
 	});
@@ -185,6 +185,18 @@ int main()
 	cout << "Fini" << endl;
 	t3.join();
 	
+	cout << "------Test buffered Channel-----" << endl;
+	Chan<int, 5> multi;
+	thread([&]() {
+		multi << 1 << 2 << 3 << 4 << 5;
+		this_thread::sleep_for(chrono::milliseconds(500));
+		Close(multi);
+	}).detach();
+	for(auto& asd:multi)
+	{
+		cout << asd << endl;
+	}
+
 	//must be fix
 	// This test doesn't make sens it's dead locking itself because output channel can only buffer 1 value and we end up trying to put 9 values in it
 	/*cout << "------Test closing Channel-----" << endl;
