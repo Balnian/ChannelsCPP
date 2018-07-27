@@ -17,6 +17,7 @@ In the future i will try to bring each implementation closer to the Go implement
 - [ ] Custom For class, for cleaner use with select (no bool value)
 - [x] Range for loop on channel
 - [x] Close function (ties in with the Range for loop feature)
+- [ ] make_Chan function to replace the [make](https://golang.org/ref/spec#Making_slices_maps_and_channels) function in Go
 
 ## Features
 ### Channels
@@ -32,11 +33,11 @@ Ther are two types of channel in go, the [basic channel type](https://tour.golan
 * Chaining insertion and extraction
 * Iterators to work with C++ Range for loop (emulate the Go feature)
   
-#### Basic Channel
-For this implementation the basic channel only block when receiving if there is nothing to in the queue (This might/will change when the buffered channel type is introduced to resemble more closely the Go language implementation) 
+#### Unbuffered Channel
+Unbuffered Channel only have 1 slot for data, so it's not exactly Unbuffered and as such does not behave like the Unbuffered Channel in Go that block until there's a sender and a receiver ready at the same time.  (It will change in the future)
 
 ```C++
-chan<int> ch;
+Chan<int> ch;
 // inserting 
 int i = 2;
 ch << 1;
@@ -46,7 +47,22 @@ i << ch;
 ch >> y
 ```
 #### Buffered Channel
-To be implemented!!!  
+Buffered Channel are a type of channel that doesn't block unless the buffer is full.
+
+```C++
+Chan<int, 5> multi;
+
+thread([&]() {
+	multi << 1 << 2 << 3 << 4 << 5;
+	this_thread::sleep_for(chrono::milliseconds(500)); // Give some time to process the data
+	Close(multi);
+}).detach();
+
+for(auto& asd:multi)
+{
+	cout << asd << endl;
+}
+```
 
 ### Select
 The C++ implementation of the Go Select statement  
@@ -54,7 +70,7 @@ The C++ implementation of the Go Select statement
 * can have one or infinite [Case](#case) block (infinite = until you connot compile it)
 * can have zero or one [Default](#default) block (enforced in code)
 * support input in channel in [Case](#case) block channel evaluation (feature seems to be working but might need a bit more attention)
-* random channel selection is **not** supported at the moment if multiple channel are ready the first (highest Case) will be read
+* random channel ([Case](#case)) selection is now supported
   
 Go exemple (from [here](https://tour.golang.org/concurrency/5)) :  
 ```Go
@@ -137,3 +153,6 @@ There can only be at most **1** Default block in a [Select](#select) statement a
 ### Close
 Function called on a [Channel](#channels) to close the stream.  
 Most of the time it's use to notify a [Channel](#channels) that is being iterated over in a Range for loop. It is in fact the only way to exit a Range for loop.
+
+### make_Chan
+Is included, but doesn't work! **DO NOT USE**
