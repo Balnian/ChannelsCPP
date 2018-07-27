@@ -100,7 +100,7 @@ int main()
 
 	{
 		Chan<int> c;
-		thread([&]()
+		thread([=]() mutable
 		{
 			for (size_t i = 0; i < 10; i++)
 			{
@@ -112,6 +112,7 @@ int main()
 		{
 			c << i;
 		}
+		this_thread::sleep_for(chrono::milliseconds(1)); // wait for last entry to be printed
 	}
 
 	cout << "------Demo fibonacci (https://tour.golang.org/concurrency/5)-----" << endl;
