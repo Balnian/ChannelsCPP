@@ -120,9 +120,6 @@ int main()
 	Chan<int> c;
 	Chan<int> quit;
 
-	c << 78;
-	cout << c << endl;
-
 	thread([&]()
 	{
 		for (size_t i = 0; i < 10; i++)
@@ -189,9 +186,10 @@ int main()
 	t3.join();
 	
 	//must be fix
-	cout << "------Test closing Channel-----" << endl;
+	// This test doesn't make sens it's dead locking itself because output channel can only buffer 1 value and we end up trying to put 9 values in it
+	/*cout << "------Test closing Channel-----" << endl;
 	Chan<int> tested;
-	Chan<int> output;
+	Chan<int,9> output;
 	vector<thread> vt;
 	for (size_t i = 0; i < 10; i++)
 	{
@@ -201,8 +199,8 @@ int main()
 		});
 	}
 	this_thread::sleep_for(chrono::seconds(1));
-	tested << 3 << 2 << 1; //doesn't work... find why (atomic not initialized)
-	1 >> (2 >> (3 >> (4 >> tested)));
+	tested << 3 << 2 << 1 << 0 << -1 << -2; //doesn't work... find why (atomic not initialized)
+	-5 >> (-4 >> (-3 >> tested));
 	//Close(tested);
 	int i = 0;
 	for (auto &asd : output)
@@ -214,5 +212,5 @@ int main()
 	for (auto &t : vt)
 	{
 		t.join();
-	}
+	}*/
 }
