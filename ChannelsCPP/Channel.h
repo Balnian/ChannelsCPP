@@ -5,56 +5,95 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <limits>
 
 #include "ChannelBuffer.h"
 #include "IChannel.h"
 #include "OChannel.h"
 #include "ChannelUtility.h"
+#include "Circular_buffer.h"
 
 namespace go
 {
 	//Channel Type references: https://golang.org/ref/spec#Channel_types
-	template<typename T>
-	class Chan :public channel::IChan<T>, public channel::OChan<T>
+	template<typename T, std::size_t Buffer_Size = 1>
+	class Chan :public IChan<T, Buffer_Size>, public OChan<T, Buffer_Size>
 	{
 	public:
 		Chan()
 		{
-			channel::IChan<T>::m_buffer = channel::OChan<T>::m_buffer = std::make_shared<channel::ChannelBuffer<T>>();
+			IChan::m_buffer = OChan::m_buffer = std::make_shared<internal::ChannelBuffer<T, Buffer_Size>>();
+			//IChan<T, Buffer_Size>::m_buffer = OChan<T, Buffer_Size>::m_buffer = std::make_shared<internal::ChannelBuffer<T, Buffer_Size>>();
 		}
 		~Chan() = default;
 
 		//Insert in channel
-		friend 	channel::OChan<T> operator<<(Chan<T>& ch, const T& obj)
+		friend 	OChan<T, Buffer_Size> operator<<(Chan<T, Buffer_Size>& ch, const T& obj)
 		{
-			return static_cast<channel::OChan<T>>(ch) << obj;
+			return static_cast<OChan<T, Buffer_Size>>(ch) << obj;
 			/*ch.m_buffer->insertValue(obj);
 			return ch;*/
 		}
-		friend 	channel::OChan<T> operator >> (const T& obj, Chan<T>& ch)
+		friend 	OChan<T, Buffer_Size> operator >> (const T& obj, Chan<T, Buffer_Size>& ch)
 		{
-			return static_cast<channel::OChan<T>>(ch) << obj;
+			return static_cast<OChan<T, Buffer_Size>>(ch) << obj;
 
 			/*ch.m_buffer->insertValue(obj);
 			return  ch;*/
 
 		}
 		//Stream
-		friend std::ostream& operator<<(std::ostream& os, Chan<T>& ch)
+		friend std::ostream& operator<<(std::ostream& os, Chan<T, Buffer_Size>& ch)
 		{
-			return os << static_cast<channel::OChan<T>>(ch);
+			return os << static_cast<OChan<T, Buffer_Size>>(ch);
 		}
-		friend std::istream& operator >> (std::istream& is, Chan<T>& ch)
+		friend std::istream& operator >> (std::istream& is, Chan<T, Buffer_Size>& ch)
 		{
-			return is >> static_cast<channel::IChan<T>>(ch);
+			return is >> static_cast<IChan<T, Buffer_Size>>(ch);
 		}
 
 
 
 	};
 
+	/*template<typename T>
+	class Chan<T,0> :public IChan<T>, public OChan<T>
+	{
+	public:
+		Chan()
+		{
+			IChan<T>::m_buffer = OChan<T>::m_buffer = std::make_shared<internal::ChannelBuffer<T>>();
+		}
+		~Chan() = default;
+
+		//Insert in channel
+		friend 	OChan<T> operator<<(Chan<T>& ch, const T& obj)
+		{
+			return static_cast<OChan<T>>(ch) << obj;
+		}
+		friend 	OChan<T> operator >> (const T& obj, Chan<T>& ch)
+		{
+			return static_cast<OChan<T>>(ch) << obj;
+
+		}
+		//Stream
+		friend std::ostream& operator<<(std::ostream& os, Chan<T>& ch)
+		{
+			return os << static_cast<OChan<T>>(ch);
+		}
+		friend std::istream& operator >> (std::istream& is, Chan<T>& ch)
+		{
+			return is >> static_cast<IChan<T>>(ch);
+		}
 
 
+
+	};*/
+
+}
+
+//template<typename T>
+//using inf_chan = Chan<T, std::numeric_limits<std::size_t>::infinity(), std::queue<T>>;
 
 	//Specialized (Buffered)
 	/*template<typename T, std::size_t bufferSize>
@@ -155,4 +194,3 @@ namespace go
 
 	};*/
 
-}

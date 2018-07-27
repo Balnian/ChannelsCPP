@@ -145,6 +145,7 @@
     <ClCompile Include="Channel.cpp" />
     <ClCompile Include="ChannelBuffer.cpp" />
     <ClCompile Include="ChannelUtility.cpp" />
+    <ClCompile Include="Circular_buffer.cpp" />
     <ClCompile Include="IChannel.cpp" />
     <ClCompile Include="OChannel.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="Channel.h" />
     <ClInclude Include="ChannelBuffer.h" />
     <ClInclude Include="ChannelUtility.h" />
+    <ClInclude Include="Circular_buffer.h" />
     <ClInclude Include="IChannel.h" />
     <ClInclude Include="OChannel.h" />
   </ItemGroup>

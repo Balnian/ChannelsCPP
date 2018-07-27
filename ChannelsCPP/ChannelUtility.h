@@ -3,26 +3,27 @@
 #include <utility>
 #include <functional>
 #include<iostream>
+#include <random>
+#include <algorithm>
 
 /*#include "IChannel.h"
 #include "OChannel.h"*/
 
 namespace go
 {
-	template<typename T> class Chan;
-	namespace channel
-	{
-		template<typename T> class OChan;
-		template<typename T> class IChan;
-	}
-	
+	template<typename T, std::size_t Buffer_Size> class Chan;
+
+	template<typename T, std::size_t Buffer_Size> class OChan;
+	template<typename T, std::size_t Buffer_Size> class IChan;
+
+
 	// Select statements references: https://golang.org/ref/spec#Select_statements
 	class Case
 	{
 		std::function<bool()> task;
 	public:
-		template<typename T, typename func>
-		Case(channel::IChan<T> ch, func f)
+		template<typename T, std::size_t Buffer_Size, typename func>
+		Case(IChan<T, Buffer_Size> ch, func f)
 		{
 			task = [=]() {
 				auto val = ch.m_buffer->tryGetNextValue();
@@ -34,8 +35,8 @@ namespace go
 			};
 		}
 
-		template<typename T, typename func>
-		Case(channel::OChan<T> ch, func f)
+		template<typename T, std::size_t Buffer_Size, typename func>
+		Case(OChan<T, Buffer_Size> ch, func f)
 		{
 			task = [=]() {
 				f();
@@ -43,9 +44,11 @@ namespace go
 			};
 		}
 
-		template<typename T, typename func>
-		Case(Chan<T> ch, func f): Case(channel::IChan<T>(ch),std::forward<func>(f)){}
+		template<typename T, std::size_t Buffer_Size, typename func>
+		Case(Chan<T, Buffer_Size> ch, func f) : Case(IChan<T, Buffer_Size>(ch), std::forward<func>(f)) {}
 
+		Case(const Case&) = default;
+		Case() { task = []() {return true; }; }
 
 		bool operator() ()
 		{
@@ -58,7 +61,7 @@ namespace go
 		std::function<void()> task;
 	public:
 		template<typename func>
-		Default(func f) 
+		Default(func f)
 		{
 			task = f;
 		}
@@ -71,21 +74,38 @@ namespace go
 
 	class Select
 	{
+		std::vector<Case> cases;
+
+		bool randomExec()
+		{
+			std::random_device rd;
+			std::mt19937 g(rd());
+			std::shuffle(begin(cases), end(cases), g);
+			for (auto& c : cases)
+			{
+				if (!c())
+					return true;
+			}
+			return false;
+		}
+
 		template<typename ...T>
 		void exec(Case && c, T &&... params)
 		{
-			if (c())
-				exec(std::forward<T>(params)...);
+			cases.emplace_back(c);
+			exec(std::forward<T>(params)...);
 		}
 
 		void exec(Case && c)
 		{
-			c();
+			cases.emplace_back(c);
+			randomExec();
 		}
 
 		void exec(Default && d)
 		{
-			d();
+			if(!randomExec())
+				d();
 		}
 		template<typename ...T>
 		void exec(Default && c, T &&... params)
@@ -95,7 +115,7 @@ namespace go
 
 	public:
 		template<typename ...T>
-		Select(T &&... params)
+		Select(T &&... params):cases(sizeof...(params))
 		{
 			exec(std::forward<T>(params)...);
 		}
@@ -103,16 +123,16 @@ namespace go
 
 	// Close references: https://golang.org/ref/spec#Close
 	// we try to avoid exceptions so we will have custom implementation
-	template<typename T>
-	void Close(channel::OChan<T> ch)
+	template<typename T, std::size_t Buffer_Size>
+	void Close(OChan<T, Buffer_Size> ch)
 	{
 		ch.close();
 	}
 
-	template<typename T>
-	Chan<T> && make_Chan()
+	template<typename T, std::size_t Buffer_Size>
+	Chan<T, Buffer_Size> && make_Chan()
 	{
-		return Chan<T>();
+		return Chan<T, Buffer_Size>();
 	}
 
 
