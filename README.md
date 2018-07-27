@@ -9,11 +9,11 @@ I also want to stabilize the code a bit more, do performance testing/ C++ versio
 In the future i will try to bring each implementation closer to the Go implementation by respecting the API design and behavior.
 ## Features list
 - [x] [Basic Go Channel type](#basic-channel) (will be modify when the [Buffered Channel](#buffered-channel) is implemented)
-- [ ] [Buffered Go Channel type](#buffered-channel)
+- [x] [Buffered Go Channel type](#buffered-channel)
 - [x] Channel stream input/output operator overload for inserting and extracting
 - [x] [Select statement](#select)
 - [x] [Select statement](#select) with channel insertion
-- [ ] [Select statement](#select) random case selection when multiple available
+- [x] [Select statement](#select) random case selection when multiple available
 - [ ] Custom For class, for cleaner use with select (no bool value)
 - [x] Range for loop on channel
 - [x] Close function (ties in with the Range for loop feature)
