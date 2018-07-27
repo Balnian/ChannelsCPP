@@ -20,7 +20,7 @@ namespace go
 			pointer m_end;
 			size_t m_size;
 
-			void increment(pointer p)const
+			void increment(pointer& p)const
 			{
 				if (p + 1 == &m_buffer[0] + Buffer_Size)
 				{
