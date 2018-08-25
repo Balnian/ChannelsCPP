@@ -11,6 +11,11 @@
 
 namespace go
 {
+	namespace internal
+	{
+		template<typename...> constexpr bool dependent_false = false;
+	}
+	
 	template<typename T, std::size_t Buffer_Size> class Chan;
 
 	template<typename T, std::size_t Buffer_Size> class OChan;
@@ -110,8 +115,7 @@ namespace go
 		template<typename ...T>
 		void exec(Default && c, T &&... params)
 		{
-			// Always false
-			static_assert(static_cast<long long>(sizeof...(params)) == -1, "There should only be at most 1 Default case and it must be the last parameter of the Select");
+			static_assert(internal::dependent_false<T...>, "There should only be at most 1 Default case and it must be the last parameter of the Select");
 		}
 
 	public:
