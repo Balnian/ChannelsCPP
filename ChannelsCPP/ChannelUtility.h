@@ -110,7 +110,8 @@ namespace go
 		template<typename ...T>
 		void exec(Default && c, T &&... params)
 		{
-			static_assert(false, "There should only be at most 1 Default case and it must be the last parameter of the Select");
+			// Always false
+			static_assert(static_cast<long long>(sizeof...(params)) == -1, "There should only be at most 1 Default case and it must be the last parameter of the Select");
 		}
 
 	public:
