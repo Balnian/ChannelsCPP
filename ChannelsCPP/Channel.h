@@ -28,15 +28,15 @@ namespace go
 		~Chan() = default;
 
 		//Insert in channel
-		friend 	OChan<T, Buffer_Size> operator<<(Chan<T, Buffer_Size>& ch, const T& obj)
+		friend 	OChan<T, Buffer_Size>& operator<<(Chan<T, Buffer_Size>& ch, const T& obj)
 		{
-			return static_cast<OChan<T, Buffer_Size>>(ch) << obj;
+			return static_cast<OChan<T, Buffer_Size>&>(ch) << obj;
 			/*ch.m_buffer->insertValue(obj);
 			return ch;*/
 		}
-		friend 	OChan<T, Buffer_Size> operator >> (const T& obj, Chan<T, Buffer_Size>& ch)
+		friend 	OChan<T, Buffer_Size>& operator >> (const T& obj, Chan<T, Buffer_Size>& ch)
 		{
-			return static_cast<OChan<T, Buffer_Size>>(ch) << obj;
+			return static_cast<OChan<T, Buffer_Size>&>(ch) << obj;
 
 			/*ch.m_buffer->insertValue(obj);
 			return  ch;*/
@@ -45,11 +45,11 @@ namespace go
 		//Stream
 		friend std::ostream& operator<<(std::ostream& os, Chan<T, Buffer_Size>& ch)
 		{
-			return os << static_cast<OChan<T, Buffer_Size>>(ch);
+			return os << static_cast<OChan<T, Buffer_Size>&>(ch);
 		}
 		friend std::istream& operator >> (std::istream& is, Chan<T, Buffer_Size>& ch)
 		{
-			return is >> static_cast<IChan<T, Buffer_Size>>(ch);
+			return is >> static_cast<IChan<T, Buffer_Size>&>(ch);
 		}
 
 
