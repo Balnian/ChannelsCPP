@@ -22,7 +22,7 @@ namespace go
 	public:
 		Chan()
 		{
-			IChan::m_buffer = OChan::m_buffer = std::make_shared<internal::ChannelBuffer<T, Buffer_Size>>();
+			Chan::IChan::m_buffer = Chan::OChan::m_buffer = std::make_shared<internal::ChannelBuffer<T, Buffer_Size>>();
 			//IChan<T, Buffer_Size>::m_buffer = OChan<T, Buffer_Size>::m_buffer = std::make_shared<internal::ChannelBuffer<T, Buffer_Size>>();
 		}
 		~Chan() = default;
