@@ -76,7 +76,7 @@ namespace go
 			{
 				if (empty())
 					throw std::out_of_range("container is empty");
-				return *m_end
+				return *m_end;
 			}
 
 			syze_type size() const
