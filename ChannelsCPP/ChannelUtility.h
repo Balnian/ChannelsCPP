@@ -120,8 +120,9 @@ namespace go
 
 	public:
 		template<typename ...T>
-		Select(T &&... params):cases(sizeof...(params))
+		Select(T &&... params)//:cases(sizeof...(params))
 		{
+			cases.reserve(sizeof...(params));
 			exec(std::forward<T>(params)...);
 		}
 	};
