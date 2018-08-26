@@ -15,6 +15,7 @@ namespace go
 	public:
 		OChan() = default;
 		OChan(const OChan<T, Buffer_Size>& ch) = default;// :m_buffer(ch.m_buffer) {}
+		OChan(OChan<T, Buffer_Size>&& ch) { swap(m_buffer, ch.m_buffer); }
 											//Insert in channel
 		friend 	OChan<T, Buffer_Size>& operator<<(OChan<T, Buffer_Size>& ch, const T& obj)
 		{

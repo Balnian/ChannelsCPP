@@ -54,6 +54,7 @@ namespace go
 		public:
 			IChan() = default;
 			IChan(const IChan<T, Buffer_Size>& ch) = default;//:m_buffer(ch.m_buffer) {}
+			IChan(IChan<T, Buffer_Size>&& ch) {swap(m_buffer,ch.m_buffer);};
 
 			//Extract from channel
 			friend 	IChan<T, Buffer_Size>& operator >> (IChan<T, Buffer_Size>& ch, T& obj)
