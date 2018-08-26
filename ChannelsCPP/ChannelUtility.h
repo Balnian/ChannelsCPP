@@ -135,7 +135,7 @@ namespace go
 		ch.close();
 	}
 
-	template<typename T, std::size_t Buffer_Size>
+	template<typename T, std::size_t Buffer_Size = 1>
 	Chan<T, Buffer_Size> && make_Chan()
 	{
 		return Chan<T, Buffer_Size>();
