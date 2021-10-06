@@ -72,7 +72,7 @@ The C++ implementation of the Go Select statement
 * support input in channel in [Case](#case) block channel evaluation (feature seems to be working but might need a bit more attention)
 * random channel ([Case](#case)) selection is now supported
   
-Go exemple (from [here](https://tour.golang.org/concurrency/5)) :  
+Go example (from [here](https://tour.golang.org/concurrency/5)) :  
 ```Go
 func fibonacci(c, quit chan int) {
 	x, y := 0, 1
@@ -101,7 +101,7 @@ func main() {
 
 ```
 
-C++ exemple implementation :
+C++ example implementation :
 ```C++ 
 void fibonacci(Chan<int>& c, Chan<int>& quit)
 {
